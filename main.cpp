@@ -3,7 +3,6 @@
 #include <vector>
 #include <cmath>
 #include <algorithm>
-#include <random>
 #include "SignalsFromFile.h"
 
 // Функция для нахождения медианы
