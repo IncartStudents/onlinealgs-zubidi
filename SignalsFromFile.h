@@ -1,6 +1,5 @@
 #pragma once
 #include <fstream>
-#include <sstream>
 #include <vector>
 
 using tTime = unsigned int; // Время, например, в миллисекундах.
@@ -8,8 +7,10 @@ using tData = float;        // Тип данных сигнала.
 
 class SignalBufferData {
 public:
-    tTime getTimeEnd() const { return 0; }
-    tData* addData(tData*, size_t) { return nullptr; }
+    virtual ~SignalBufferData() = default;
+
+    // Добавление данных в буфер
+    virtual void addData(const tData* data, size_t size) = 0;
 };
 
 class IStreamAlg {
@@ -19,7 +20,7 @@ public:
     virtual bool Run() = 0;
 };
 
-const tTime G_QUANT = 40;
+const tTime G_QUANT = 200;
 
 class SignalsFromFile : public IStreamAlg {
 protected:
@@ -33,35 +34,27 @@ public:
         : signal_buffer(buffer),
           m_fscan(fscan),
           QUANT(G_QUANT) {
-        m_buf = new tData[QUANT]; // Создаем рабочий буфер
+        m_buf = new tData[QUANT];
         Reset();
     }
 
-    ~SignalsFromFile() {
-        if (m_buf) delete[] m_buf;
+    ~SignalsFromFile() override {
+        delete[] m_buf;
     }
 
     void Reset() override {
         m_fscan.clear();
-        m_fscan.seekg(0, std::ios::beg); // Перемотка на начало файла
+        m_fscan.seekg(0, std::ios::beg);
     }
 
     bool Run() override {
         size_t len = QUANT * sizeof(tData);
-
         if (m_fscan.eof()) return false;
-
-        m_fscan.read((char*)m_buf, len);
-
+        m_fscan.read(reinterpret_cast<char*>(m_buf), len);
         if (m_fscan.gcount() < len) {
             return false;
         }
-
         signal_buffer.addData(m_buf, QUANT);
-
         return true;
     }
 };
-
-
-
