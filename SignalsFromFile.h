@@ -2,14 +2,12 @@
 #include <fstream>
 #include <vector>
 
-using tTime = unsigned int; // Время, например, в миллисекундах.
-using tData = float;        // Тип данных сигнала.
+using tTime = unsigned int;
+using tData = float;        
 
 class SignalBufferData {
 public:
     virtual ~SignalBufferData() = default;
-
-    // Добавление данных в буфер
     virtual void addData(const tData* data, size_t size) = 0;
 };
 
